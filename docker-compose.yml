@@ -1,5 +1,8 @@
 version: '2'
 
+networks:
+  network:
+
 services:
   app:
     image: ambientum/php:8.1-nginx
@@ -7,9 +10,32 @@ services:
     volumes:
       - ./src:/var/www/app
     ports:
-      - "80:8080"
-      - "443:8083"
+      - "9000:8080"
+      - "444:8083"
+    networks:
+      - network
     environment:
       - XDEBUG_ENABLED=true
       - PHP_IDE_CONFIG=serverName=ambientum
       - DOCKER_FOR_WINDOWS=${DOCKER_FOR_WINDOWS}
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: web
+    networks:
+      - network
+    ports:
+      - "80:80"
+    volumes:
+      - ./src:/var/www/app
+  db:
+    image: postgres
+    container_name: db
+    restart: always
+    networks:
+      - network
+    ports:
+      - "54005:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
